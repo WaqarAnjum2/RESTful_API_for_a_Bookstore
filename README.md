@@ -12,14 +12,7 @@
 </td>
 </tr>
 
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/92a551a8-9b06-4452-8509-019d23f0ef64">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/441ed2f5-b3cf-43f2-ab87-41ad772d0766">
-</td>
-</tr>
+
 
 <tr>
 <td width="50%">
