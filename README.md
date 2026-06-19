@@ -7,9 +7,7 @@
 <td width="50%">
 <img src="https://github.com/user-attachments/assets/24d1aae8-1774-4cf6-847b-1cc05f870cb5">
 </td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/2399874f-fae7-4751-a90d-a07e84231c3f">
-</td>
+
 </tr>
 
 
