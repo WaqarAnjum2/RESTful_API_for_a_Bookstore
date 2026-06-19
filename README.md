@@ -2,81 +2,44 @@
 
 # 📸 Application Preview
 
-<table>
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/24d1aae8-1774-4cf6-847b-1cc05f870cb5">
-</td>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/76e5ea15-22b8-4056-8376-d3e925f909ae" width="48%">
+  <img src="https://github.com/user-attachments/assets/488f4305-516a-4799-ba47-261c9c9918a8" width="48%">
+</p>
 
-</tr>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/b9423e2f-a8f4-41c8-97c4-2b03296ccf44" width="48%">
+  <img src="https://github.com/user-attachments/assets/049437bd-481e-4bb0-b9c3-9d91af095c61" width="48%">
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/304cd34e-6d8e-435e-8bf2-c10164c3de47" width="48%">
+  <img src="https://github.com/user-attachments/assets/bf4a3eeb-7ed8-4590-a7b3-e6e6a7a65ea2" width="48%">
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ddca4395-6209-43c3-9df1-38aaaa090a08" width="48%">
+  <img src="https://github.com/user-attachments/assets/66bf1aa0-07ac-4486-8114-3316865f5532" width="48%">
+</p>
 
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/f0bcbffe-eae1-4e37-bdee-636b255d88cc">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/864a69ca-8991-4c71-ab31-7b75515dc733">
-</td>
-</tr>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8dc3b35b-2be7-4f4c-ad12-5644f8fd0b49" width="48%">
+  <img src="https://github.com/user-attachments/assets/1e73db00-61b3-4312-9560-05210beff7cd" width="48%">
+</p>
 
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/355ac84e-f8ca-49a8-83ed-8cf8a14f9df0">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/6ede2650-f97b-4971-8017-35483e7853e2">
-</td>
-</tr>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c853d05a-4221-402d-9f4d-6cd6e408617d" width="48%">
+  <img src="https://github.com/user-attachments/assets/706f8da5-e71a-4a53-8dbc-b439c49c9862" width="48%">
+</p>
 
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/eb2c6464-ab44-4221-8e10-f63c3539a858">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/a21eb0d6-8157-491a-bb6e-47c22a942d24">
-</td>
-</tr>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/00409aa1-79cf-4126-bd44-00345ba7d01f" width="48%">
+  <img src="https://github.com/user-attachments/assets/87a37ed7-7688-4808-8cf4-a7238daeabda" width="48%">
+</p>
 
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/1cf5fe0a-3f67-49d7-9683-99e64d7b955d">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/d47c1f38-edc8-434c-a7f0-c7e6ff32edc350">
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/d633ec43-ad84-438b-afa4-e47d565ecd9a">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/c1e733a6-c9dc-4ac7-85d2-f44922b514e9">
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/0d714a5e-047b-4038-b57e-fc1197e2b934">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/a8161000-798e-42c7-9c68-8ba03bbe6833">
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/06e23e20-1190-4d0a-998f-fc1f78e4cdc7">
-</td>
-<td width="50%">
-<img src="https://github.com/user-attachments/assets/5f94913b-7b92-4a39-83d6-e5e19dd32783">
-</td>
-</tr>
-</table>
-
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/35572ca3-9a1c-4cd5-ab65-11eff561a288" width="48%">
+</p>
 
 
 # Bookstore REST API + Basic UI (Express + MongoDB)
