@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books CRUD UI</title>
+    <style>
+      :root{
+        --bg:#f4efe6;--panel:rgba(255,250,242,0.92);--panel-2:#f8f1e4;--text:#1f1b16;--muted:#6f6254;--accent:#b45309;--accent-2:#7c2d12;--border:rgba(124,45,18,0.14);--shadow:0 18px 50px rgba(94,55,20,0.12);
+      }
+      *{box-sizing:border-box}
+      body{margin:0;font-family:Georgia,"Times New Roman",serif;color:var(--text);background:radial-gradient(circle at top left, rgba(180,83,9,0.16), transparent 30%),radial-gradient(circle at right top, rgba(124,45,18,0.1), transparent 24%),linear-gradient(180deg,#fffdf9 0%,var(--bg) 100%);}
+      .shell{max-width:1180px;margin:0 auto;padding:28px 18px 40px;}
+      h1,h2{margin:0;font-family:Georgia,serif}
+      p{color:var(--muted);line-height:1.6}
+      .panel{background:var(--panel);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+
+      .top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+      .top .title{padding:22px}
+      .top .title h1{font-size:clamp(2rem,3.3vw,3rem);line-height:1.02;margin-top:8px}
+      .top .title .sub{margin-top:10px}
+
+      .grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px}
+      @media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+      .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+      button{border:0;border-radius:999px;padding:11px 16px;font:700 14px/1 Arial, sans-serif;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 22px rgba(124,45,18,0.2)}
+      button.secondary{background:transparent;color:var(--accent-2);border:1px solid rgba(124,45,18,0.2);box-shadow:none}
+
+      .field{display:grid;gap:6px;margin-top:12px}
+      label{font:700 12px/1.2 Arial, sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-2)}
+      input{width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;font:15px/1.45 Arial, sans-serif;background:rgba(255,255,255,0.78);color:var(--text)}
+
+      .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+      .card{background:rgba(255,250,242,0.92);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 12px 26px rgba(94,55,20,0.08)}
+      .card h3{font-size:1.05rem;margin:0 0 6px}
+      .meta{font:12px/1.5 Arial,sans-serif;color:var(--muted)}
+      .card .actionsRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+      .card .actionsRow button{padding:9px 12px;font-size:12px}
+
+      .responseBox{padding:16px;border-radius:18px;background:rgba(31,27,22,0.96);color:#fff7ed;border:1px solid rgba(255,247,237,0.1);margin-top:14px}
+      .responseBox .muted{color:rgba(255,247,237,0.7)}
+      pre{margin:12px 0 0;padding:14px;border-radius:16px;background:#1f1b16;color:#fff7ed;overflow:auto}
+
+      .status{margin-top:10px;min-height:22px;color:var(--muted)}
+
+      /* modal */
+      .modal-backdrop{position:fixed;inset:0;background:rgba(31,27,22,0.58);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+      .modal-backdrop.open{display:flex}
+      .modal{width:min(920px,100%);background:#fffaf2;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,0.24);border:1px solid rgba(124,45,18,0.12);overflow:hidden}
+      .modal-header,.modal-footer{padding:16px 20px;background:rgba(248,241,228,0.8)}
+      .modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+      .modal-body{padding:20px;display:grid;gap:16px}
+      .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+      .detail-box{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px}
+      .detail-box .label{display:block;font:700 12px/1.2 Arial, sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-2);margin-bottom:6px}
+      .detail-box .value{word-break:break-word}
+      .muted{color:var(--muted)}
+      .toast-container{position:fixed;top:18px;right:18px;z-index:60;display:grid;gap:10px}
+      .toast{min-width:240px;max-width:320px;background:#1f1b16;color:#fff7ed;border-radius:14px;padding:12px 14px;box-shadow:0 16px 36px rgba(31,27,22,0.28);opacity:0;transform:translateY(-8px);transition:opacity .2s ease, transform .2s ease}
+      .toast.show{opacity:1;transform:translateY(0)}
+      .toast.success{background:#14532d}
+      .toast.error{background:#7f1d1d}
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="top">
+        <div class="panel title" style="flex:1;min-width:320px">
+          <div class="eyebrow" style="display:inline-block;font:700 12px/1.2 Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-2);background:rgba(180,83,9,0.08);padding:8px 12px;border-radius:999px">Bookstore REST API</div>
+          <h1>Books CRUD</h1>
+          <div class="sub">Search, create, update, delete — and every operation shows the API response.</div>
+          <div class="status" id="status">Ready.</div>
+        </div>
+
+        <div class="panel" style="width:420px;max-width:100%">
+          <div style="padding:18px">
+            <h2 style="margin-bottom:6px">Search & Create</h2>
+            <p class="muted" style="margin-top:0">Uses <code style="background:rgba(180,83,9,0.08);padding:2px 6px;border-radius:8px">GET/POST/PUT/DELETE /books</code></p>
+
+            <div class="field">
+              <label for="searchInput">Search by ISBN or title</label>
+              <input id="searchInput" placeholder="e.g. 9780061122415 or The Alchemist" oninput="debouncedSearch()" />
+            </div>
+
+            <div class="actions">
+              <button onclick="openCreateModal()">Create</button>
+              <button class="secondary" onclick="loadBooks('all')">Show All</button>
+              <button class="secondary" onclick="clearSearch()">Clear</button>
+            </div>
+
+            <div class="responseBox">
+              <div class="muted">API Response</div>
+              <pre id="responseBox">Run an action to see the response.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel" style="padding:18px">
+          <h2>Books (Cards)</h2>
+          <p class="muted">Click a book card to open details modal (edit & delete included).</p>
+          <div id="cards" class="cards"></div>
+        </div>
+
+        <div class="panel" style="padding:18px">
+          <h2>Quick Tips</h2>
+          <div class="muted" style="line-height:1.8">
+            <div>• Create uses a modal.</div>
+            <div>• Update/Delete available from details modal.</div>
+            <div>• After each operation, API response is shown on the right.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details/Edit Modal -->
+    <div id="bookBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <h2 id="modalTitle">Book Details</h2>
+            <div class="muted" id="modalSubtitle">View / Edit / Delete</div>
+          </div>
+          <button class="secondary" type="button" onclick="closeBookModal()">Close</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="modalView">
+            <div class="modal-grid">
+              <div class="detail-box"><span class="label">ID</span><div class="value" id="modalId"></div></div>
+              <div class="detail-box"><span class="label">ISBN</span><div class="value" id="modalIsbn"></div></div>
+              <div class="detail-box"><span class="label">Title</span><div class="value" id="modalBookTitle"></div></div>
+              <div class="detail-box"><span class="label">Author</span><div class="value" id="modalAuthor"></div></div>
+              <div class="detail-box"><span class="label">Price</span><div class="value" id="modalPrice"></div></div>
+              <div class="detail-box"><span class="label">Published Date</span><div class="value" id="modalPublishedDate"></div></div>
+            </div>
+          </div>
+
+          <div id="modalEdit" style="display:none;">
+            <div class="modal-grid">
+              <div class="field" style="margin-top:0"><label for="editTitle">Title</label><input id="editTitle" /></div>
+              <div class="field" style="margin-top:0"><label for="editAuthor">Author</label><input id="editAuthor" /></div>
+              <div class="field" style="margin-top:0"><label for="editPrice">Price</label><input id="editPrice" type="number" step="0.01" /></div>
+              <div class="field" style="margin-top:0"><label for="editIsbn">ISBN</label><input id="editIsbn" /></div>
+              <div class="field" style="grid-column:1/-1;margin-top:0"><label for="editPublishedDate">Published Date</label><input id="editPublishedDate" type="date" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="actions" style="margin-top:0">
+            <button type="button" onclick="toggleEditMode(true)">Edit</button>
+            <button type="button" onclick="saveEditedBook()">Save</button>
+            <button type="button" class="secondary" onclick="deleteEditedBook()">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div id="createBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <h2>Create Book</h2>
+            <div class="muted">POST /books</div>
+          </div>
+          <button class="secondary" type="button" onclick="closeCreateModal()">Close</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-grid">
+            <div class="field" style="margin-top:0"><label for="createTitle">Title</label><input id="createTitle" placeholder="The Alchemist" /></div>
+            <div class="field" style="margin-top:0"><label for="createAuthor">Author</label><input id="createAuthor" placeholder="Paulo Coelho" /></div>
+            <div class="field" style="margin-top:0"><label for="createPrice">Price</label><input id="createPrice" type="number" step="0.01" placeholder="15" /></div>
+            <div class="field" style="margin-top:0"><label for="createIsbn">ISBN</label><input id="createIsbn" placeholder="9780061122415" /></div>
+            <div class="field" style="grid-column:1/-1;margin-top:0"><label for="createPublishedDate">Published Date</label><input id="createPublishedDate" type="date" /></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="actions" style="margin-top:0">
+            <button type="button" onclick="createBook()">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+      const API_BASE = "";
+      let searchTimer = null;
+      let searchMode = null; // null | 'all' | 'search'
+      let allBooksCache = [];
+      let activeBook = null;
+      let editMode = false;
+
+      function setStatus(msg, ok = true){
+        const el = document.getElementById('status');
+        el.style.color = ok ? '#14532d' : '#991b1b';
+        el.textContent = msg;
+      }
+
+      function showToast(message, type='success'){
+        const container=document.getElementById('toastContainer');
+        const toast=document.createElement('div');
+        toast.className=`toast ${type}`;
+        toast.textContent=message;
+        container.appendChild(toast);
+        requestAnimationFrame(()=>toast.classList.add('show'));
+        setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),200)},2400);
+      }
+
+      function setResponse(data){
+        document.getElementById('responseBox').textContent = JSON.stringify(data, null, 2);
+      }
+
+      function formatDate(value){
+        if(!value) return '';
+        return new Date(value).toISOString().slice(0,10);
+      }
+
+      function openCreateModal(){
+        document.getElementById('createTitle').value='';
+        document.getElementById('createAuthor').value='';
+        document.getElementById('createPrice').value='';
+        document.getElementById('createIsbn').value='';
+        document.getElementById('createPublishedDate').value='';
+        document.getElementById('createBackdrop').classList.add('open');
+        document.getElementById('createBackdrop').setAttribute('aria-hidden','false');
+        setStatus('Create modal opened.');
+      }
+
+      function closeCreateModal(){
+        document.getElementById('createBackdrop').classList.remove('open');
+        document.getElementById('createBackdrop').setAttribute('aria-hidden','true');
+      }
+
+      function toggleEditMode(force){
+        editMode = !!force;
+        document.getElementById('modalView').style.display = editMode ? 'none' : 'block';
+        document.getElementById('modalEdit').style.display = editMode ? 'block' : 'none';
+        document.getElementById('modalTitle').textContent = editMode ? 'Edit Book' : 'Book Details';
+        document.getElementById('modalSubtitle').textContent = editMode ? 'Update book and save' : 'View / Edit / Delete';
+      }
+
+      function openBookModal(book){
+        activeBook = book;
+        toggleEditMode(false);
+        document.getElementById('modalId').textContent = book._id || '';
+        document.getElementById('modalIsbn').textContent = book.isbn || '';
+        document.getElementById('modalBookTitle').textContent = book.title || '';
+        document.getElementById('modalAuthor').textContent = book.author || '';
+        document.getElementById('modalPrice').textContent = book.price ?? '';
+        document.getElementById('modalPublishedDate').textContent = formatDate(book.publishedDate);
+
+        document.getElementById('editTitle').value = book.title || '';
+        document.getElementById('editAuthor').value = book.author || '';
+        document.getElementById('editPrice').value = book.price ?? '';
+        document.getElementById('editIsbn').value = book.isbn || '';
+        document.getElementById('editPublishedDate').value = book.publishedDate ? formatDate(book.publishedDate) : '';
+
+        document.getElementById('bookBackdrop').classList.add('open');
+        document.getElementById('bookBackdrop').setAttribute('aria-hidden','false');
+      }
+
+      function closeBookModal(){
+        document.getElementById('bookBackdrop').classList.remove('open');
+        document.getElementById('bookBackdrop').setAttribute('aria-hidden','true');
+      }
+
+      function getCreatePayload(){
+        return {
+          title: document.getElementById('createTitle').value.trim(),
+          author: document.getElementById('createAuthor').value.trim(),
+          price: document.getElementById('createPrice').value,
+          isbn: document.getElementById('createIsbn').value.trim(),
+          publishedDate: document.getElementById('createPublishedDate').value,
+        };
+      }
+
+      function getEditPayload(){
+        return {
+          title: document.getElementById('editTitle').value.trim(),
+          author: document.getElementById('editAuthor').value.trim(),
+          price: document.getElementById('editPrice').value,
+          isbn: document.getElementById('editIsbn').value.trim(),
+          publishedDate: document.getElementById('editPublishedDate').value,
+        };
+      }
+
+      async function request(path, options = {}){
+        const res = await fetch(API_BASE + path, options);
+        const data = await res.json().catch(()=>({}));
+        if(!res.ok) throw new Error(data.message || res.statusText);
+        return data;
+      }
+
+      function renderCards(books){
+        const container=document.getElementById('cards');
+        container.innerHTML='';
+
+        if(!books.length){
+          container.innerHTML='<div class="muted">No books found.</div>';
+          return;
+        }
+
+        books.forEach((b)=>{
+          const card=document.createElement('div');
+          card.className='card';
+          card.innerHTML=`
+            <h3>${b.title || 'Untitled'}</h3>
+            <div class="meta">Author: ${b.author || 'Unknown'}</div>
+            <div class="meta">ISBN: ${b.isbn || 'n/a'}</div>
+            <div class="meta">Price: ${b.price ?? ''}</div>
+            <div class="meta">Published: ${b.publishedDate ? formatDate(b.publishedDate) : ''}</div>
+            <div class="actionsRow">
+              <button type="button" class="secondary" onclick="event.stopPropagation(); openBookModal(${JSON.stringify(b).replaceAll('\\\\','\\\\\\')})">Details</button>
+              <button type="button" onclick="event.stopPropagation(); openBookModal(${JSON.stringify(b).replaceAll('\\\\','\\\\\\')}); toggleEditMode(true);">Edit</button>
+              <button type="button" class="secondary" onclick="event.stopPropagation(); if(confirm('Delete this book?')) deleteById('${b._id}')">Delete</button>
+            </div>
+          `;
+          // keep JSON.stringify inside onclick is heavy; but ok for small.
+          card.onclick = ()=>openBookModal(b);
+          container.appendChild(card);
+        });
+      }
+
+      async function loadBooks(mode='all', searchTerm=''){
+        try{
+          setStatus('Loading books...');
+          let path='/books?limit=100';
+          if(mode==='search' && searchTerm){
+            path = '/books?search=' + encodeURIComponent(searchTerm) + '&limit=100';
+          }
+          const data = await request(path);
+          const books=data.data || [];
+          allBooksCache = books;
+          setResponse(data);
+          setStatus(`Loaded ${books.length} book(s).`);
+          renderCards(books);
+        }catch(e){
+          setStatus(e.message,false);
+        }
+      }
+
+      async function deleteById(id){
+        try{
+          setStatus('Deleting book...');
+          const data = await request('/books/' + id, {method:'DELETE', headers:{'Content-Type':'application/json'}});
+          setResponse(data);
+          showToast('Book deleted.','success');
+          setStatus('Book deleted.');
+          closeBookModal();
+          await loadBooks(searchMode || 'all', document.getElementById('searchInput').value.trim());
+        }catch(e){
+          setStatus(e.message,false);
+          showToast(e.message,'error');
+        }
+      }
+
+      async function createBook(){
+        try{
+          const payload=getCreatePayload();
+          setStatus('Creating book...');
+          const data = await request('/books', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          setResponse(data);
+          showToast('Book created.','success');
+          setStatus('Book created.');
+          closeCreateModal();
+          await loadBooks('all');
+        }catch(e){
+          setStatus(e.message,false);
+          showToast(e.message,'error');
+        }
+      }
+
+      async function saveEditedBook(){
+        try{
+          if(!activeBook?._id){
+            setStatus('No active book selected.',false);
+            return;
+          }
+          const payload=getEditPayload();
+          setStatus('Updating book...');
+          const data = await request('/books/' + activeBook._id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          setResponse(data);
+          showToast('Book updated.','success');
+          setStatus('Book updated.');
+          closeBookModal();
+          await loadBooks(searchMode || 'all', document.getElementById('searchInput').value.trim());
+        }catch(e){
+          setStatus(e.message,false);
+          showToast(e.message,'error');
+        }
+      }
+
+      async function deleteEditedBook(){
+        try{
+          if(!activeBook?._id){
+            setStatus('No active book selected.',false);
+            return;
+          }
+          if(!confirm('Delete this book?')) return;
+          setStatus('Deleting book...');
+          const data = await request('/books/' + activeBook._id, {method:'DELETE', headers:{'Content-Type':'application/json'}});
+          setResponse(data);
+          showToast('Book deleted.','success');
+          setStatus('Book deleted.');
+          closeBookModal();
+          await loadBooks(searchMode || 'all', document.getElementById('searchInput').value.trim());
+        }catch(e){
+          setStatus(e.message,false);
+          showToast(e.message,'error');
+        }
+      }
+
+      function clearSearch(){
+        document.getElementById('searchInput').value='';
+        searchMode='all';
+        loadBooks('all');
+      }
+
+      function debouncedSearch(){
+        clearTimeout(searchTimer);
+        searchTimer=setTimeout(()=>{
+          const term=document.getElementById('searchInput').value.trim();
+          if(!term){
+            searchMode='all';
+            loadBooks('all');
+            return;
+          }
+          searchMode='search';
+          loadBooks('search', term);
+        },250);
+      }
+
+      // backdrop click close
+      document.getElementById('bookBackdrop').addEventListener('click',(ev)=>{
+        if(ev.target.id==='bookBackdrop') closeBookModal();
+      });
+      document.getElementById('createBackdrop').addEventListener('click',(ev)=>{
+        if(ev.target.id==='createBackdrop') closeCreateModal();
+      });
+
+      // init
+      loadBooks('all');
+      // default create modal
+      openCreateModal();
+    </script>
+  </body>
+</html>
+

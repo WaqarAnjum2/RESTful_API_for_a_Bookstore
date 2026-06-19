@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Tester - CRUD</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 28px; color:#111; }
+      .wrap { display:flex; gap: 18px; align-items:flex-start; flex-wrap: wrap; }
+      .panel { border:1px solid #ddd; border-radius:12px; padding:16px; min-width: 320px; }
+      label { display:block; margin-top: 10px; font-weight: 600; }
+      input, textarea { width: 100%; padding: 10px; margin-top: 6px; box-sizing:border-box; }
+      textarea { min-height: 90px; resize: vertical; }
+      button { margin-top: 12px; padding: 10px 14px; cursor:pointer; }
+      code { background:#f6f6f6; padding:2px 6px; border-radius:6px; word-break: break-all; }
+      .row { display:flex; gap:12px; flex-wrap: wrap; }
+      .status { margin-top: 10px; }
+      table { width:100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { border:1px solid #eee; padding: 8px; font-size: 13px; text-align:left; vertical-align: top; }
+      th { background:#fafafa; }
+      .muted { color:#666; font-size: 12px; }
+      .actions { display:flex; gap: 10px; flex-wrap: wrap; }
+      .actions button { margin-top: 0; }
+      .topbar { margin-bottom: 14px; display:flex; justify-content: space-between; align-items:center; gap:12px; flex-wrap: wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div>
+        <h1>API Tester - CRUD</h1>
+        <div class="muted">Resource: <code id="resourceCode"></code></div>
+      </div>
+      <div>
+        <a href="./index.html">Back</a>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="panel" style="flex:1;">
+        <h2>Create / Update</h2>
+
+        <div class="row">
+          <div style="flex:1;">
+            <label>id (for GET/PUT/DELETE)</label>
+            <input id="idInput" placeholder="leave empty for create" />
+          </div>
+          <div style="flex:1;">
+            <label>title</label>
+            <input id="titleInput" placeholder="title" />
+          </div>
+        </div>
+
+        <label>search</label>
+        <input id="searchInput" placeholder="search by title or content" />
+
+        <label>description / content / text</label>
+        <textarea id="bodyInput" placeholder="description (items) / content (notes) / text (messages)"></textarea>
+
+        <label>messages only: toUserId</label>
+        <input id="toUserIdInput" placeholder="required for messages" />
+
+        <div class="actions">
+          <button onclick="getList()">List</button>
+          <button onclick="getOne()">Get by id</button>
+          <button onclick="createOne()">Create</button>
+          <button onclick="updateOne()">Update by id</button>
+          <button onclick="deleteOne()">Delete</button>
+        </div>
+
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="panel" style="flex:1;">
+        <h2>Results</h2>
+        <div id="resultBox" class="muted">Run an action to see results.</div>
+        <table id="resultTable" style="display:none;"></table>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "";
+
+      const resource = new URLSearchParams(location.search).get("resource") || "items";
+      document.getElementById("resourceCode").textContent = resource;
+
+      const fieldsByResource = {
+        items: { titleKey: "title", bodyKey: "description" },
+        notes: { titleKey: "title", bodyKey: "content" },
+        messages: { titleKey: "title", bodyKey: "text", needsToUserId: true }
+      };
+
+      function setStatus(msg, ok=true) {
+        const el = document.getElementById("status");
+        el.style.color = ok ? "#0a7a0a" : "#b00020";
+        el.textContent = msg;
+      }
+
+      function renderJSON(data) {
+        const box = document.getElementById("resultBox");
+        const table = document.getElementById("resultTable");
+
+        table.style.display = "none";
+        table.innerHTML = "";
+
+        if (data && typeof data === "object" && data.data && Array.isArray(data.data)) {
+          const rows = data.data;
+          if (rows.length === 0) {
+            box.textContent = "No results.";
+            return;
+          }
+          const cols = Object.keys(rows[0]);
+          table.style.display = "table";
+          const thead = document.createElement("thead");
+          const trh = document.createElement("tr");
+          cols.forEach(c => {
+            const th = document.createElement("th");
+            th.textContent = c;
+            trh.appendChild(th);
+          });
+          thead.appendChild(trh);
+          table.appendChild(thead);
+
+          const tbody = document.createElement("tbody");
+          rows.forEach(r => {
+            const tr = document.createElement("tr");
+            cols.forEach(c => {
+              const td = document.createElement("td");
+              td.textContent = (r[c] === undefined || r[c] === null) ? "" : String(r[c]);
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          return;
+        }
+
+        box.textContent = JSON.stringify(data, null, 2);
+      }
+
+      async function request(path, options={}) {
+        const res = await fetch(API_BASE + path, options);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || res.status + " " + res.statusText);
+        }
+        return data;
+      }
+
+      function buildPayload() {
+        const cfg = fieldsByResource[resource];
+        const title = document.getElementById("titleInput").value.trim();
+        const body = document.getElementById("bodyInput").value.trim();
+
+        const payload = {};
+        if (title) payload[cfg.titleKey] = title;
+        if (body) payload[cfg.bodyKey] = body;
+
+        if (resource === "messages") {
+          const toUserId = document.getElementById("toUserIdInput").value.trim();
+          if (toUserId) payload.toUserId = toUserId;
+        }
+        return payload;
+      }
+
+      function buildListPath() {
+        const search = document.getElementById("searchInput").value.trim();
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        return "/api/" + resource + (params.toString() ? "?" + params.toString() : "");
+      }
+
+      async function getList() {
+        try {
+          setStatus("Loading...");
+          const data = await request(buildListPath(), { method: "GET" });
+          renderJSON(data);
+          setStatus("Loaded ✓");
+        } catch (e) {
+          setStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function getOne() {
+        try {
+          const id = document.getElementById("idInput").value.trim();
+          if (!id) return setStatus("Enter id first.", false);
+          setStatus("Loading...");
+          const data = await request("/api/" + resource + "/" + id, { method: "GET" });
+          renderJSON(data);
+          setStatus("Loaded ✓");
+        } catch (e) {
+          setStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function createOne() {
+        try {
+          setStatus("Creating...");
+          const payload = buildPayload();
+          const data = await request("/api/" + resource, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          renderJSON(data);
+          setStatus("Created ✓");
+        } catch (e) {
+          setStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function updateOne() {
+        try {
+          const id = document.getElementById("idInput").value.trim();
+          if (!id) return setStatus("Enter id first.", false);
+          setStatus("Updating...");
+          const payload = buildPayload();
+          const data = await request("/api/" + resource + "/" + id, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+          });
+          renderJSON(data);
+          setStatus("Updated ✓");
+        } catch (e) {
+          setStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function deleteOne() {
+        try {
+          const id = document.getElementById("idInput").value.trim();
+          if (!id) return setStatus("Enter id first.", false);
+          if (!confirm("Delete " + id + "?")) return;
+
+          setStatus("Deleting...");
+          const data = await request("/api/" + resource + "/" + id, {
+            method: "DELETE"
+          });
+          renderJSON(data);
+          setStatus("Deleted ✓");
+        } catch (e) {
+          setStatus("Error: " + e.message, false);
+        }
+      }
+
+      setStatus("Ready.");
+    </script>
+  </body>
+</html>
