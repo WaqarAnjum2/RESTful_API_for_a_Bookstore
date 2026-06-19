@@ -1,6 +1,6 @@
 # Bookstore REST API + Basic UI (Express + MongoDB)
 
-Full endpoint documentation lives in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+Full endpoint documentation lives in [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ## What’s included
 - Book CRUD endpoints:
